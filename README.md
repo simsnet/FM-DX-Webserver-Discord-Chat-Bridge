@@ -21,6 +21,7 @@ Before installing, you should have **a Discord account in good standing** and an
    ```
 5. Once installed, configure the `.env` variables file:
    * To configure `DISCORD_TOKEN`, you'll need to create a Discord bot.  Click [here](https://github.com/simsnet/FM-DX-Webserver-Discord-Chat-Bridge/blob/main/discord.md) for instructions on how to create your own.
+   * Add the Discord channel ID you'd like to use for server chat in `DISCORD_CHANNEL_ID`.
    * The websocket URL is how the bridge connects to your FM-DX Webserver.
      * If your server is HTTP, use `ws://`.  If it's HTTPS, use `wss://`.
      * Next, enter your server domain or IP address, along with the port number.

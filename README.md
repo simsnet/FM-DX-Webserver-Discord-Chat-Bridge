@@ -52,13 +52,3 @@ Additionally, a text editor with syntax highlighting/formatting (Notepad++, Visu
 ## Contribute
 
 If you wish to contribute to the source code, simply open a pull request.  Any and all contributions are welcome!
-
-
-
-```
-# Go to https://discord.com/developers/applications/ and create a new application
-# On the left side click Installation, uncheck the "User Install" box, scroll to "Guild Install" and add the "bot" scope, then add the Administrator permission.  Click Save Changes.
-# Scroll up, copy and paste the Discord bot invite link in your browser and add it to your server.
-# Back in Discord applications, click "Bot" on the left side and click "Reset Token".  Fill in your 2FA info.  Click "Copy" and paste the long key below.  THIS IS YOUR BOT PASSWORD - DO NOT SHARE IT WITH ANYONE!
-# Lastly, turn on "Message Content Intent" under "Privileged Gateway Intents" and click Save Changes.  Adding this bot to over 100 servers will require verification to keep this active.
-```

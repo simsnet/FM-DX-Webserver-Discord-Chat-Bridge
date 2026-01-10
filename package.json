@@ -1,0 +1,16 @@
+{
+  "name": "FM-DX Webserver Discord Chat Bridge",
+  "version": "1.0",
+  "description": "Discord chat bridge for the FM-DX Webserver",
+  "author": "simsnet",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "bridge": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.25.1",
+    "dotenv": "^17.2.3",
+    "ws": "^8.19.0"
+  }
+}

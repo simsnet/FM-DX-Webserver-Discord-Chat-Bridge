@@ -1,6 +1,8 @@
 # FM-DX Webserver Discord Chat Bridge
 
-This is an independent server bridging chat between the FM-DX Webserver and Discord.  I created this application with two goals in mind: easily send chat messages between the FM-DX Webserver and Discord, and maintain a chat log that was easily searchable and non-volatile.
+This is an independent server bridging chat between the FM-DX Webserver and Discord.
+
+I created this application with two goals in mind: easily send chat messages between the FM-DX Webserver and Discord, and maintain a chat log that was easily searchable and non-volatile.
 
 Once installed, the server requires no further input from the operator unless a configuration change is needed.
 

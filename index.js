@@ -165,7 +165,7 @@ discordClient.on('messageCreate', (message) => {
         message: message.content
     });
 
-    console.log(`[${getTime()}] Sending Discord message to Websocket:\n[DISCORD] ${discordname} (${discordid}): ${message.content}\n\n`);
+    console.log(`[${getTime()}] Sending Discord message to WebSocket:\n[DISCORD] ${discordname} (${discordid}): ${message.content}\n\n`);
 
     ws.send(payload);
 });

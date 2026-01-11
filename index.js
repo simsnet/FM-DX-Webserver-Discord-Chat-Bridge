@@ -25,6 +25,8 @@ let reconnectTimer = null;
 let reconnectDelay = 1000;
 const MAX_RECONNECT_DELAY = 30000;
 
+let wsConnected = false;
+
 const {
     DISCORD_TOKEN,
     DISCORD_CHANNEL_ID,
@@ -40,6 +42,37 @@ const discordClient = new Client({
         GatewayIntentBits.MessageContent
     ]
 });
+
+let lastConnectionState = null;
+
+async function sendConnectionStatus(state) {
+    if (!discordClient.isReady()) {
+        return;
+    }
+
+    if (lastConnectionState === state) {
+        return;
+    }
+
+    try {
+        const channel = await discordClient.channels.fetch(DISCORD_CHANNEL_ID);
+        if (!channel) {
+            return;
+        }
+
+        const message =
+            state === 'online'
+                ? ':white_check_mark: **Chat connection online**'
+                : ':x: **Chat connection offline**';
+
+        await channel.send(message);
+
+        lastConnectionState = state;
+    } catch (err) {
+        console.error('Failed to send connection status to Discord:', err);
+    }
+}
+
 
 function getTime() {
     const timenow = new Intl.DateTimeFormat('en-US', {
@@ -65,14 +98,18 @@ function connectWebSocket() {
     process.title = 'Connecting to WebSocket...  |  FMDXWeb Discord Chat Bridge v1.0';
 
     ws = new WebSocket(WS_URL);
+	
+	ws.on('open', async () => {
+		console.log('Connected to WebSocket!\n');
+		process.title = `Connected to WebSocket!  |  FMDXWeb Discord Chat Bridge v1.0`;
 
-    ws.on('open', () => {
-        console.log('Connected to WebSocket!\n');
-        process.title = `Connected to WebSocket!  |  FMDXWeb Discord Chat Bridge v1.0`;
-        live = false;
-        clearTimeout(quietTimer);
-        reconnectDelay = 1000;
-    });
+		wsConnected = true;
+		live = false;
+		clearTimeout(quietTimer);
+		reconnectDelay = 1000;
+
+		await sendConnectionStatus('online');
+	});
 
     ws.on('message', async(data) => {
         clearTimeout(quietTimer);
@@ -112,8 +149,12 @@ function connectWebSocket() {
             wnick = wnick.substring(0, 255);
         }
 
-        if (typeof wmsg === 'string' && wmsg.length > 255) {
-            wmsg = wmsg.substring(0, 255);
+        if (typeof wmsg === 'string') {
+            wmsg = wmsg.replace(/@(everyone|here|<@\d+>)/g, '');
+
+            if (wmsg.length > 255) {
+                wmsg = wmsg.substring(0, 255);
+            }
         }
 
         console.log(`[${getTime()}] Sending WebSocket message to Discord:\n${payload.nickname}: ${payload.message}\n`);
@@ -121,10 +162,14 @@ function connectWebSocket() {
         await channel.send(`**${wnick}:** ${wmsg}`);
     });
 
-    ws.on('close', () => {
+    ws.on('close', async() => {
         console.warn('WebSocket connection closed');
         process.title = `WebSocket connection closed, attempting to reconnect...  |  FMDXWeb Discord Chat Bridge v1.0`;
+
+		wsConnected = false;
         live = false;
+        await sendConnectionStatus('offline');
+
         scheduleReconnect();
     });
 
@@ -196,11 +241,20 @@ discordClient.on('messageCreate', (message) => {
 
 let botname;
 
-discordClient.once(Events.ClientReady, (client) => {
+discordClient.once(Events.ClientReady, async (client) => {
     botname = client.user.tag;
     console.log(`Connected to Discord as ${botname}!\n`);
+
     startTitleRotation();
+
+    // Send new connection state now that Discord is ready
+    if (wsConnected) {
+        await sendConnectionStatus('online');
+    } else {
+        await sendConnectionStatus('offline');
+    }
 });
+
 
 discordClient.login(DISCORD_TOKEN);
 
@@ -235,3 +289,25 @@ function stopTitleRotation() {
     clearInterval(titleInterval);
     titleInterval = null;
 }
+
+async function shutdown(signal) {
+    console.log(`${signal} received, shutting down...`);
+
+    try {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.close();
+        }
+
+        await sendConnectionStatus('offline');
+    } finally {
+        process.exit(0);
+    }
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
+process.on('SIGHUP', shutdown);
+process.on('uncaughtException', async(err) => {
+    console.error('Uncaught exception:', err);
+    await shutdown('uncaughtException');
+});

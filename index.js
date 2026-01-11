@@ -51,8 +51,8 @@ function getTime() {
         second: '2-digit',
         hour12: true
     }).format(new Date());
-	
-	return timenow;
+
+    return timenow;
 }
 
 getTime();
@@ -105,9 +105,20 @@ function connectWebSocket() {
             return;
         }
 
+        let wnick = payload.nickname;
+        let wmsg = payload.message;
+
+        if (typeof wnick === 'string' && wnick.length > 255) {
+            wnick = wnick.substring(0, 255);
+        }
+
+        if (typeof wmsg === 'string' && wmsg.length > 255) {
+            wmsg = wmsg.substring(0, 255);
+        }
+
         console.log(`[${getTime()}] Sending WebSocket message to Discord:\n${payload.nickname}: ${payload.message}\n`);
 
-        await channel.send(`**${payload.nickname}:** ${payload.message}`);
+        await channel.send(`**${wnick}:** ${wmsg}`);
     });
 
     ws.on('close', () => {
@@ -159,13 +170,24 @@ discordClient.on('messageCreate', (message) => {
     const discordname = message.member?.displayName || message.author.username;
     const discordid = message.member?.id || message.author.id;
 
+    let dname = discordname;
+    let dmsg = message.content;
+
+    if (typeof dname === 'string' && dname.length > 255) {
+        dname = dname.substring(0, 255);
+    }
+
+    if (typeof dmsg === 'string' && dmsg.length > 255) {
+        dmsg = dmsg.substring(0, 255);
+    }
+
     const payload = JSON.stringify({
         source: 'discord',
-        nickname: `[DISCORD] ${discordname}`,
-        message: message.content
+        nickname: `[DISCORD] ${dname}`,
+        message: dmsg
     });
 
-    console.log(`[${getTime()}] Sending Discord message to WebSocket:\n[DISCORD] ${discordname} (${discordid}): ${message.content}\n\n`);
+    console.log(`[${getTime()}] Sending Discord message to Websocket:\n[DISCORD] ${discordname} (${discordid}): ${message.content}\n\n`);
 
     ws.send(payload);
 });
@@ -177,7 +199,7 @@ let botname;
 discordClient.once(Events.ClientReady, (client) => {
     botname = client.user.tag;
     console.log(`Connected to Discord as ${botname}!\n`);
-	startTitleRotation();
+    startTitleRotation();
 });
 
 discordClient.login(DISCORD_TOKEN);

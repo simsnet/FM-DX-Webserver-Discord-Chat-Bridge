@@ -62,8 +62,8 @@ async function sendConnectionStatus(state) {
 
         const message =
             state === 'online'
-                ? ':white_check_mark: **Chat connection online**'
-                : ':x: **Chat connection offline**';
+             ? ':white_check_mark: **Chat connection online**'
+             : ':x: **Chat connection offline**';
 
         await channel.send(message);
 
@@ -72,7 +72,6 @@ async function sendConnectionStatus(state) {
         console.error('Failed to send connection status to Discord:', err);
     }
 }
-
 
 function getTime() {
     const timenow = new Intl.DateTimeFormat('en-US', {
@@ -98,18 +97,18 @@ function connectWebSocket() {
     process.title = 'Connecting to WebSocket...  |  FMDXWeb Discord Chat Bridge v1.0';
 
     ws = new WebSocket(WS_URL);
-	
-	ws.on('open', async () => {
-		console.log('Connected to WebSocket!\n');
-		process.title = `Connected to WebSocket!  |  FMDXWeb Discord Chat Bridge v1.0`;
 
-		wsConnected = true;
-		live = false;
-		clearTimeout(quietTimer);
-		reconnectDelay = 1000;
+    ws.on('open', async() => {
+        console.log('Connected to WebSocket!\n');
+        process.title = `Connected to WebSocket!  |  FMDXWeb Discord Chat Bridge v1.0`;
 
-		await sendConnectionStatus('online');
-	});
+        wsConnected = true;
+        live = false;
+        clearTimeout(quietTimer);
+        reconnectDelay = 1000;
+
+        await sendConnectionStatus('online');
+    });
 
     ws.on('message', async(data) => {
         clearTimeout(quietTimer);
@@ -166,7 +165,7 @@ function connectWebSocket() {
         console.warn('WebSocket connection closed');
         process.title = `WebSocket connection closed, attempting to reconnect...  |  FMDXWeb Discord Chat Bridge v1.0`;
 
-		wsConnected = false;
+        wsConnected = false;
         live = false;
         await sendConnectionStatus('offline');
 
@@ -241,7 +240,7 @@ discordClient.on('messageCreate', (message) => {
 
 let botname;
 
-discordClient.once(Events.ClientReady, async (client) => {
+discordClient.once(Events.ClientReady, async(client) => {
     botname = client.user.tag;
     console.log(`Connected to Discord as ${botname}!\n`);
 
@@ -254,7 +253,6 @@ discordClient.once(Events.ClientReady, async (client) => {
         await sendConnectionStatus('offline');
     }
 });
-
 
 discordClient.login(DISCORD_TOKEN);
 

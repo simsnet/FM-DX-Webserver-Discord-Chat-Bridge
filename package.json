@@ -1,6 +1,6 @@
 {
   "name": "FM-DX Webserver Discord Chat Bridge",
-  "version": "1.0",
+  "version": "2.1",
   "description": "Discord chat bridge for the FM-DX Webserver",
   "author": "simsnet",
   "type": "module",

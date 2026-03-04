@@ -1,10 +1,10 @@
 console.clear();
 
-process.title = 'Starting up...  |  FMDXWeb Discord Chat Bridge v1.0';
+process.title = 'Starting up...  |  FMDXWeb Discord Chat Bridge v2.1';
 
 console.log('');
 console.log('FM-DX Webserver Discord Chat Bridge');
-console.log('v1.0 - created by Simsnet (https://github.com/simsnet)\n');
+console.log('v2.1 - created by Simsnet (https://github.com/simsnet)\n');
 
 import {
     Client,
@@ -30,7 +30,8 @@ let wsConnected = false;
 const {
     DISCORD_TOKEN,
     DISCORD_CHANNEL_ID,
-    WS_URL
+    WS_URL,
+	DISCORD_ADMIN_BADGE
 } = process.env;
 
 /* ---------------- Discord Client ---------------- */
@@ -90,17 +91,17 @@ function getTime() {
 getTime();
 console.log(`Server started at ${getTime()}.\n`);
 
-/* ---------------- WebSocket Client ---------------- */
+/* ---------------- WebSocket → Discord ---------------- */
 
 function connectWebSocket() {
     console.log(`Connecting to FM-DX Webserver Chat WebSocket (${WS_URL})...`);
-    process.title = 'Connecting to WebSocket...  |  FMDXWeb Discord Chat Bridge v1.0';
+    process.title = 'Connecting to WebSocket...  |  FMDXWeb Discord Chat Bridge v2.1';
 
     ws = new WebSocket(WS_URL);
 
     ws.on('open', async() => {
         console.log('Connected to WebSocket!\n');
-        process.title = `Connected to WebSocket!  |  FMDXWeb Discord Chat Bridge v1.0`;
+        process.title = `Connected to WebSocket!  |  FMDXWeb Discord Chat Bridge v2.1`;
 
         wsConnected = true;
         live = false;
@@ -119,7 +120,7 @@ function connectWebSocket() {
                 live = true;
                 console.log('Waiting for message queue to clear...');
                 console.log('Queue cleared. Message forwarding enabled.\n');
-                process.title = `Ready to accept messages!  |  FMDXWeb Discord Chat Bridge v1.0`;
+                process.title = `Ready to accept messages!  |  FMDXWeb Discord Chat Bridge v2.1`;
             }, 500);
             return;
         }
@@ -143,9 +144,18 @@ function connectWebSocket() {
 
         let wnick = payload.nickname;
         let wmsg = payload.message;
+        let wadmin = payload.admin;
 
-        if (typeof wnick === 'string' && wnick.length > 255) {
+        if (typeof wnick !== 'string') {
+            wnick = 'Unknown';
+        }
+
+        if (wnick.length > 255) {
             wnick = wnick.substring(0, 255);
+        }
+
+        if (wadmin === true) {
+            wnick = `${DISCORD_ADMIN_BADGE} ${wnick}`;
         }
 
         if (typeof wmsg === 'string') {
@@ -163,7 +173,7 @@ function connectWebSocket() {
 
     ws.on('close', async() => {
         console.warn('WebSocket connection closed');
-        process.title = `WebSocket connection closed, attempting to reconnect...  |  FMDXWeb Discord Chat Bridge v1.0`;
+        process.title = `WebSocket connection closed, attempting to reconnect...  |  FMDXWeb Discord Chat Bridge v2.1`;
 
         wsConnected = false;
         live = false;
@@ -174,7 +184,7 @@ function connectWebSocket() {
 
     ws.on('error', (err) => {
         console.error('WebSocket error:', err);
-        process.title = `WebSocket error!  |  FMDXWeb Discord Chat Bridge v1.0`;
+        process.title = `WebSocket error!  |  FMDXWeb Discord Chat Bridge v2.1`;
     });
 }
 
@@ -207,7 +217,7 @@ discordClient.on('messageCreate', (message) => {
 
     if (!ws || ws.readyState !== WebSocket.OPEN) {
         console.warn('WebSocket not connected — Discord message dropped');
-        process.title = `Websocket connection closed, pausing Discord bridge...  |  FMDXWeb Discord Chat Bridge v1.0`;
+        process.title = `Websocket connection closed, pausing Discord bridge...  |  FMDXWeb Discord Chat Bridge v2.1`;
         return;
     }
 
@@ -231,7 +241,7 @@ discordClient.on('messageCreate', (message) => {
         message: dmsg
     });
 
-    console.log(`[${getTime()}] Sending Discord message to Websocket:\n[DISCORD] ${discordname} (${discordid}): ${message.content}\n\n`);
+    console.log(`[${getTime()}] Sending Discord message to Websocket:\n[DISCORD] ${discordname} (${discordid}): ${message.content}\n`);
 
     ws.send(payload);
 });
@@ -259,9 +269,9 @@ discordClient.login(DISCORD_TOKEN);
 /* --- Status bar --- */
 
 const actions = [
-    () => process.title = `Discord messages forwarding to ${WS_URL}  |  FMDXWeb Discord Chat Bridge v1.0`,
-    () => process.title = `WebSocket messages forwarding to ID ${DISCORD_CHANNEL_ID}  |  FMDXWeb Discord Chat Bridge v1.0`,
-    () => process.title = `Logged into Discord as ${botname}  |  FMDXWeb Discord Chat Bridge v1.0`
+    () => process.title = `Discord messages forwarding to ${WS_URL}  |  FMDXWeb Discord Chat Bridge v2.1`,
+    () => process.title = `WebSocket messages forwarding to ID ${DISCORD_CHANNEL_ID}  |  FMDXWeb Discord Chat Bridge v2.1`,
+    () => process.title = `Logged into Discord as ${botname}  |  FMDXWeb Discord Chat Bridge v2.1`
 ];
 
 let titleInterval = null;
